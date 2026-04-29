@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/usuario.dart';
 import '../services/usuario_service.dart';
 
+const kPrimary = Color(0xFF3C0731);
+const kTextPrimary = Color(0xFF212121);
+const kTextSecondary = Color(0xFF757575);
+
 class UsuarioFormScreen extends StatefulWidget {
   final Usuario? usuario;
   const UsuarioFormScreen({super.key, this.usuario});
@@ -29,19 +33,16 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
 
   Future<void> _salvar() async {
     if (!_formKey.currentState!.validate()) return;
-
     final u = Usuario(
       nome: _nomeCtrl.text.trim(),
       email: _emailCtrl.text.trim(),
       senha: _senhaCtrl.text.trim(),
     );
-
     if (widget.usuario == null) {
       await service.criar(u);
     } else {
       await service.atualizar(widget.usuario!.id!, u);
     }
-
     if (mounted) Navigator.pop(context);
   }
 
@@ -50,36 +51,54 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
     final isEditing = widget.usuario != null;
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Editar Usuário' : 'Novo Usuário'),
+        title: Text(isEditing ? 'EDITAR USUÁRIO' : 'NOVO USUÁRIO'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 32, 20, 20),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
                 controller: _nomeCtrl,
-                decoration: const InputDecoration(labelText: 'Nome'),
+                style: const TextStyle(color: kTextPrimary),
+                cursorColor: kPrimary,
+                decoration: const InputDecoration(
+                  labelText: 'Nome',
+                  prefixIcon: Icon(Icons.person_outline, color: kTextSecondary, size: 20),
+                ),
                 validator: (v) => v!.isEmpty ? 'Informe o nome' : null,
               ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _emailCtrl,
-                decoration: const InputDecoration(labelText: 'Email'),
+                style: const TextStyle(color: kTextPrimary),
+                cursorColor: kPrimary,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email_outlined, color: kTextSecondary, size: 20),
+                ),
                 validator: (v) => v!.isEmpty ? 'Informe o email' : null,
               ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _senhaCtrl,
-                decoration: const InputDecoration(labelText: 'Senha'),
+                style: const TextStyle(color: kTextPrimary),
+                cursorColor: kPrimary,
                 obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Senha',
+                  prefixIcon: Icon(Icons.lock_outline, color: kTextSecondary, size: 20),
+                ),
                 validator: (v) => v!.isEmpty ? 'Informe a senha' : null,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _salvar,
-                  child: Text(isEditing ? 'Atualizar' : 'Cadastrar'),
+                  child: Text(isEditing ? 'ATUALIZAR' : 'CADASTRAR'),
                 ),
               ),
             ],
