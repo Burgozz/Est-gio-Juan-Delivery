@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/usuario_list_screen.dart';
+import 'screens/produto_list_screen.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kBackground = Color(0xFFFAFAFA);
@@ -68,7 +69,50 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const UsuarioListScreen(),
+      home: const HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _index = 0;
+
+  final _telas = const [
+    UsuarioListScreen(),
+    ProdutoListScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _telas[_index],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _index,
+        selectedItemColor: kPrimary,
+        unselectedItemColor: kTextSecondary,
+        backgroundColor: kSurface,
+        elevation: 8,
+        onTap: (i) => setState(() => _index = i),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people_outline),
+            activeIcon: Icon(Icons.people),
+            label: 'Usuários',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.wine_bar_outlined),
+            activeIcon: Icon(Icons.wine_bar),
+            label: 'Produtos',
+          ),
+        ],
+      ),
     );
   }
 }
