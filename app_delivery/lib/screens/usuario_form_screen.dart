@@ -19,6 +19,7 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
   final _nomeCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _senhaCtrl = TextEditingController();
+  final _telefoneCtrl = TextEditingController();
   final service = UsuarioService();
 
   @override
@@ -28,6 +29,7 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
       _nomeCtrl.text = widget.usuario!.nome;
       _emailCtrl.text = widget.usuario!.email;
       _senhaCtrl.text = widget.usuario!.senha;
+      _telefoneCtrl.text = widget.usuario!.telefone ?? '';
     }
   }
 
@@ -37,13 +39,26 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
       nome: _nomeCtrl.text.trim(),
       email: _emailCtrl.text.trim(),
       senha: _senhaCtrl.text.trim(),
+      telefone: _telefoneCtrl.text.trim().isEmpty ? null : _telefoneCtrl.text.trim(),
+      dataCadastro: widget.usuario?.dataCadastro,
     );
-    if (widget.usuario == null) {
-      await service.criar(u);
-    } else {
-      await service.atualizar(widget.usuario!.id!, u);
+    try {
+      if (widget.usuario == null) {
+        await service.criar(u);
+      } else {
+        await service.atualizar(widget.usuario!.id!, u);
+      }
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+      }
     }
-    if (mounted) Navigator.pop(context);
   }
 
   @override
@@ -92,6 +107,17 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                   prefixIcon: Icon(Icons.lock_outline, color: kTextSecondary, size: 20),
                 ),
                 validator: (v) => v!.isEmpty ? 'Informe a senha' : null,
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _telefoneCtrl,
+                style: const TextStyle(color: kTextPrimary),
+                cursorColor: kPrimary,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Telefone',
+                  prefixIcon: Icon(Icons.phone_outlined, color: kTextSecondary, size: 20),
+                ),
               ),
               const SizedBox(height: 40),
               SizedBox(

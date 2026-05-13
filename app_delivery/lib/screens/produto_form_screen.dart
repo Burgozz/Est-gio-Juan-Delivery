@@ -96,7 +96,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
-                value: _categoriaSelecionada,
+                initialValue: _categoriaSelecionada,
                 decoration: const InputDecoration(
                   labelText: 'Categoria',
                   prefixIcon: Icon(Icons.category_outlined, color: kTextSecondary, size: 20),
