@@ -2,6 +2,7 @@ package com.juan.api_delivery.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,12 +38,12 @@ public class ProdutoController {
     }
 
     @PostMapping
-    public ResponseEntity<Produto> criar(@RequestBody ProdutoDTO dto) {
+    public ResponseEntity<Produto> criar(@RequestBody @Valid ProdutoDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizar(@PathVariable Long id, @RequestBody ProdutoDTO dto) {
+    public ResponseEntity<Produto> atualizar(@PathVariable Long id, @RequestBody @Valid ProdutoDTO dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
