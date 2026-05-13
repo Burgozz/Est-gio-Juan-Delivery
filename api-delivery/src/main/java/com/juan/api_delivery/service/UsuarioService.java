@@ -6,6 +6,7 @@ import com.juan.api_delivery.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -25,19 +26,23 @@ public class UsuarioService {
 
     public Usuario criar(UsuarioDTO dto) {
         Usuario usuario = Usuario.builder()
-            .nome(dto.getNome())
-            .email(dto.getEmail())
-            .senha(dto.getSenha())
-            .build();
-        return repository.save(usuario);
+        .nome(dto.getNome())
+        .email(dto.getEmail())
+        .senha(dto.getSenha())
+        .telefone(dto.getTelefone())
+        .dataCadastro(LocalDate.now())
+        .build();
+    return repository.save(usuario);
     }
 
     public Usuario atualizar(Long id, UsuarioDTO dto) {
         Usuario usuario = buscarPorId(id);
-        usuario.setNome(dto.getNome());
-        usuario.setEmail(dto.getEmail());
-        usuario.setSenha(dto.getSenha());
-        return repository.save(usuario);
+    usuario.setNome(dto.getNome());
+    usuario.setEmail(dto.getEmail());
+    usuario.setSenha(dto.getSenha());
+    usuario.setTelefone(dto.getTelefone());
+    usuario.setDataCadastro(dto.getDataCadastro());
+    return repository.save(usuario);
     }
 
     public void deletar(Long id) {
