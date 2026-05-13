@@ -41,7 +41,6 @@ public class UsuarioService {
     usuario.setEmail(dto.getEmail());
     usuario.setSenha(dto.getSenha());
     usuario.setTelefone(dto.getTelefone());
-    usuario.setDataCadastro(dto.getDataCadastro());
     return repository.save(usuario);
     }
 
