@@ -5,6 +5,7 @@ class Usuario {
   final String senha;
   final String? telefone;
   final dynamic dataCadastro;
+  final bool ativo;
 
   Usuario({
     this.id,
@@ -13,6 +14,7 @@ class Usuario {
     required this.senha,
     this.telefone,
     this.dataCadastro,
+    this.ativo = true,
   });
 
   factory Usuario.fromJson(Map<String, dynamic> json) => Usuario(
@@ -22,6 +24,7 @@ class Usuario {
         senha: json['senha'],
         telefone: json['telefone'],
         dataCadastro: json['dataCadastro'],
+        ativo: json['ativo'] ?? true,
       );
 
   Map<String, dynamic> toJson() => {

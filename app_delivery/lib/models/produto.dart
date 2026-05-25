@@ -7,6 +7,7 @@ class Produto {
   final String? paisOrigem;
   final int? safra;
   final int estoque;
+  final bool ativo;
 
   Produto({
     this.id,
@@ -17,6 +18,7 @@ class Produto {
     this.paisOrigem,
     this.safra,
     required this.estoque,
+    this.ativo = true,
   });
 
   factory Produto.fromJson(Map<String, dynamic> json) => Produto(
@@ -28,6 +30,7 @@ class Produto {
         paisOrigem: json['paisOrigem'],
         safra: json['safra'],
         estoque: json['estoque'] ?? 0,
+        ativo: json['ativo'] ?? true,
       );
 
   Map<String, dynamic> toJson() => {

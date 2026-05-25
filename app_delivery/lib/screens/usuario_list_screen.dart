@@ -30,9 +30,38 @@ class _UsuarioListScreenState extends State<UsuarioListScreen> {
     setState(() {});
   }
 
-  Future<void> _deletar(int id) async {
-    await service.deletar(id);
-    _carregar();
+  Future<void> _deletar(int id, String nome) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text(
+          'Confirmar exclusão',
+          style: TextStyle(color: kPrimary, fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Tem certeza que deseja excluir o usuário "$nome"?',
+          style: const TextStyle(color: kTextPrimary),
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: kTextSecondary),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red.shade400),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Excluir', style: TextStyle(fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+    if (confirmar == true) {
+      await service.deletar(id);
+      _carregar();
+    }
   }
 
   @override
@@ -142,7 +171,7 @@ class _UsuarioListScreenState extends State<UsuarioListScreen> {
                         IconButton(
                           icon: Icon(Icons.delete_outline,
                               color: Colors.red.shade300, size: 20),
-                          onPressed: () => _deletar(u.id!),
+                          onPressed: () => _deletar(u.id!, u.nome),
                         ),
                       ],
                     ),

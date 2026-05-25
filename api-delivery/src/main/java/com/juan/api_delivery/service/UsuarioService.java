@@ -16,7 +16,7 @@ public class UsuarioService {
     private final UsuarioRepository repository;
 
     public List<Usuario> listarTodos() {
-        return repository.findAll();
+        return repository.findByAtivoTrue();
     }
 
     public Usuario buscarPorId(Long id) {
@@ -45,6 +45,8 @@ public class UsuarioService {
     }
 
     public void deletar(Long id) {
-        repository.deleteById(id);
+        Usuario usuario = buscarPorId(id);
+        usuario.setAtivo(false);
+        repository.save(usuario);
     }
 }

@@ -36,4 +36,8 @@ public class Produto {
 
     @Min(0)
     private Integer estoque;
+
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean ativo = true;
 }
