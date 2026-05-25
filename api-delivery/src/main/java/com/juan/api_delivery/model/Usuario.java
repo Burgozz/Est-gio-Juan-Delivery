@@ -39,4 +39,8 @@ public class Usuario {
     private String telefone;
 
     private LocalDate dataCadastro;
+
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean ativo = true;
 }
