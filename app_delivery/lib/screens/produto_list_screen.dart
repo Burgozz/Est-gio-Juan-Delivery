@@ -33,17 +33,26 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirmar exclusão'),
-        content: Text('Tem certeza que deseja excluir o produto "$nome"?'),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text(
+          'Confirmar exclusão',
+          style: TextStyle(color: kPrimary, fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Tem certeza que deseja excluir o produto "$nome"?',
+          style: const TextStyle(color: kTextPrimary),
+        ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(foregroundColor: kTextSecondary),
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text('Cancelar'),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Colors.red.shade400),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Excluir'),
+            child: const Text('Excluir', style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ],
       ),
