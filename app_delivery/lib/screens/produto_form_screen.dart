@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/produto.dart';
 import '../services/produto_service.dart';
 
@@ -62,12 +63,25 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
       safra: int.tryParse(_safraCtrl.text.trim()),
       estoque: int.parse(_estoqueCtrl.text.trim()),
     );
-    if (widget.produto == null) {
-      await service.criar(p);
-    } else {
-      await service.atualizar(widget.produto!.id!, p);
+    try {
+      if (widget.produto == null) {
+        await service.criar(p);
+      } else {
+        await service.atualizar(widget.produto!.id!, p);
+      }
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        final mensagem = e.toString().replaceFirst('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(mensagem),
+            backgroundColor: Colors.red.shade700,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     }
-    if (mounted) Navigator.pop(context);
   }
 
   @override
@@ -89,7 +103,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
                 decoration: const InputDecoration(
-                  labelText: 'Nome do Vinho',
+                  labelText: 'Nome do Vinho *',
                   prefixIcon: Icon(Icons.wine_bar_outlined, color: kTextSecondary, size: 20),
                 ),
                 validator: (v) => v!.isEmpty ? 'Informe o nome' : null,
@@ -98,7 +112,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
               DropdownButtonFormField<String>(
                 initialValue: _categoriaSelecionada,
                 decoration: const InputDecoration(
-                  labelText: 'Categoria',
+                  labelText: 'Categoria *',
                   prefixIcon: Icon(Icons.category_outlined, color: kTextSecondary, size: 20),
                 ),
                 dropdownColor: Colors.white,
@@ -117,10 +131,16 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                 cursorColor: kPrimary,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Preço (R\$)',
+                  labelText: 'Preço (R\$) *',
                   prefixIcon: Icon(Icons.attach_money, color: kTextSecondary, size: 20),
                 ),
-                validator: (v) => v!.isEmpty ? 'Informe o preço' : null,
+                validator: (v) {
+                  if (v!.isEmpty) return 'Informe o preço';
+                  final preco = double.tryParse(v.trim());
+                  if (preco == null) return 'Valor inválido';
+                  if (preco < 0) return 'O preço não pode ser negativo';
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
               TextFormField(
@@ -155,10 +175,24 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                       style: const TextStyle(color: kTextPrimary),
                       cursorColor: kPrimary,
                       keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(4),
+                      ],
                       decoration: const InputDecoration(
                         labelText: 'Safra',
+                        hintText: 'Ex: 2021',
                         prefixIcon: Icon(Icons.calendar_today_outlined, color: kTextSecondary, size: 20),
                       ),
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return null;
+                        final ano = int.tryParse(v);
+                        if (ano == null) return 'Ano inválido';
+                        if (ano < 1900 || ano > 2026) {
+                          return 'Safra deve ser entre 1900 e 2026';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                 ],
@@ -169,11 +203,21 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: const InputDecoration(
-                  labelText: 'Estoque (unidades)',
+                  labelText: 'Estoque (unidades) *',
                   prefixIcon: Icon(Icons.inventory_2_outlined, color: kTextSecondary, size: 20),
                 ),
-                validator: (v) => v!.isEmpty ? 'Informe o estoque' : null,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Informe o estoque';
+                  final qtd = int.tryParse(v);
+                  if (qtd == null) return 'Valor inválido';
+                  if (!isEditing && qtd <= 0) {
+                    return 'Estoque inicial deve ser maior que zero';
+                  }
+                  if (qtd < 0) return 'Estoque não pode ser negativo';
+                  return null;
+                },
               ),
               const SizedBox(height: 40),
               SizedBox(

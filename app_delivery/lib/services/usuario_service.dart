@@ -5,10 +5,23 @@ import '../models/usuario.dart';
 class UsuarioService {
   final String baseUrl = 'http://localhost:8080/usuarios';
 
+  String _parseErro(http.Response response) {
+    try {
+      final body = jsonDecode(response.body);
+      if (body is Map) {
+        if (body['erros'] is List) {
+          return (body['erros'] as List).join('\n');
+        }
+        if (body['erro'] != null) return body['erro'].toString();
+      }
+    } catch (_) {}
+    return 'Erro ${response.statusCode}';
+  }
+
   Future<List<Usuario>> listarTodos() async {
     final response = await http.get(Uri.parse(baseUrl));
     if (response.statusCode != 200) {
-      throw Exception('Erro ao listar usuários: ${response.statusCode}');
+      throw Exception(_parseErro(response));
     }
     final List data = jsonDecode(response.body);
     return data.map((e) => Usuario.fromJson(e)).toList();
@@ -21,7 +34,7 @@ class UsuarioService {
       body: jsonEncode(usuario.toJson()),
     );
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Erro ao criar usuário: ${response.statusCode} - ${response.body}');
+      throw Exception(_parseErro(response));
     }
   }
 
@@ -32,14 +45,14 @@ class UsuarioService {
       body: jsonEncode(usuario.toJson()),
     );
     if (response.statusCode != 200) {
-      throw Exception('Erro ao atualizar usuário: ${response.statusCode} - ${response.body}');
+      throw Exception(_parseErro(response));
     }
   }
 
   Future<void> deletar(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/$id'));
     if (response.statusCode != 200 && response.statusCode != 204) {
-      throw Exception('Erro ao deletar usuário: ${response.statusCode}');
+      throw Exception(_parseErro(response));
     }
   }
 }

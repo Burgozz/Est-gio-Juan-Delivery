@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/usuario.dart';
 import '../services/usuario_service.dart';
 
@@ -80,7 +81,7 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
                 decoration: const InputDecoration(
-                  labelText: 'Nome',
+                  labelText: 'Nome *',
                   prefixIcon: Icon(Icons.person_outline, color: kTextSecondary, size: 20),
                 ),
                 validator: (v) => v!.isEmpty ? 'Informe o nome' : null,
@@ -91,10 +92,16 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
                 decoration: const InputDecoration(
-                  labelText: 'Email',
+                  labelText: 'Email *',
                   prefixIcon: Icon(Icons.email_outlined, color: kTextSecondary, size: 20),
                 ),
-                validator: (v) => v!.isEmpty ? 'Informe o email' : null,
+                keyboardType: TextInputType.emailAddress,
+                validator: (v) {
+                  if (v!.isEmpty) return 'Informe o email';
+                  final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                  if (!regex.hasMatch(v.trim())) return 'Email inválido (ex: nome@dominio.com)';
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
               TextFormField(
@@ -103,7 +110,7 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                 cursorColor: kPrimary,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: 'Senha',
+                  labelText: 'Senha *',
                   prefixIcon: Icon(Icons.lock_outline, color: kTextSecondary, size: 20),
                 ),
                 validator: (v) => v!.isEmpty ? 'Informe a senha' : null,
@@ -114,10 +121,23 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
                 keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(11),
+                ],
                 decoration: const InputDecoration(
                   labelText: 'Telefone',
+                  hintText: 'Ex: 11987654321',
                   prefixIcon: Icon(Icons.phone_outlined, color: kTextSecondary, size: 20),
                 ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return null;
+                  if (v.length < 10 || v.length > 11) {
+                    return 'Telefone deve ter 10 ou 11 dígitos (com DDD)';
+                  }
+                  if (v[0] == '0') return 'DDD inválido (não pode começar com 0)';
+                  return null;
+                },
               ),
               const SizedBox(height: 40),
               SizedBox(

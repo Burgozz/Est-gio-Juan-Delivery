@@ -26,6 +26,9 @@ public class ProdutoService {
     }
 
     public Produto criar(ProdutoDTO dto) {
+        if (dto.getEstoque() == null || dto.getEstoque() <= 0) {
+            throw new IllegalArgumentException("Estoque inicial deve ser maior que zero para criar um produto");
+        }
         Produto produto = Produto.builder()
             .nome(dto.getNome())
             .preco(dto.getPreco())
