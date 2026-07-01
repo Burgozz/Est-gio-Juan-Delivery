@@ -51,6 +51,7 @@ class MyApp extends StatelessWidget {
           filled: true,
           fillColor: kSurface,
           labelStyle: const TextStyle(color: kTextSecondary),
+          hintStyle: TextStyle(color: kTextSecondary.withValues(alpha: 0.7)),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(color: kTextSecondary, width: 0.8),

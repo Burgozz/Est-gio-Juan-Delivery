@@ -22,6 +22,7 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
   final _senhaCtrl = TextEditingController();
   final _telefoneCtrl = TextEditingController();
   final service = UsuarioService();
+  String? _emailApiError;
 
   @override
   void initState() {
@@ -35,6 +36,7 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
   }
 
   Future<void> _salvar() async {
+    setState(() => _emailApiError = null);
     if (!_formKey.currentState!.validate()) return;
     final u = Usuario(
       nome: _nomeCtrl.text.trim(),
@@ -51,13 +53,19 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
       }
       if (mounted) Navigator.pop(context);
     } catch (e) {
+      final mensagem = e.toString().replaceFirst('Exception: ', '');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red.shade700,
-          ),
-        );
+        if (mensagem.toLowerCase().contains('email')) {
+          setState(() => _emailApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(mensagem),
+              backgroundColor: Colors.red.shade700,
+            ),
+          );
+        }
       }
     }
   }
@@ -96,10 +104,14 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                   prefixIcon: Icon(Icons.email_outlined, color: kTextSecondary, size: 20),
                 ),
                 keyboardType: TextInputType.emailAddress,
+                onChanged: (_) {
+                  if (_emailApiError != null) setState(() => _emailApiError = null);
+                },
                 validator: (v) {
                   if (v!.isEmpty) return 'Informe o email';
                   final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
                   if (!regex.hasMatch(v.trim())) return 'Email inválido (ex: nome@dominio.com)';
+                  if (_emailApiError != null) return _emailApiError;
                   return null;
                 },
               ),

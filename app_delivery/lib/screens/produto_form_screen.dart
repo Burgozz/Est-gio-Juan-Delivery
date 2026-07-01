@@ -28,13 +28,13 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
   String? _categoriaSelecionada;
 
   final List<Map<String, String>> _categorias = [
-    {'value': 'VINHO_TINTO', 'label': '🍷 Vinho Tinto'},
-    {'value': 'VINHO_BRANCO', 'label': '🥂 Vinho Branco'},
-    {'value': 'VINHO_ROSE', 'label': '🌸 Vinho Rosé'},
-    {'value': 'VINHO_ESPUMANTE', 'label': '✨ Espumante'},
-    {'value': 'VINHO_SOBREMESA', 'label': '🍯 Vinho de Sobremesa'},
-    {'value': 'VINHO_ORGANICO', 'label': '🌿 Vinho Orgânico'},
-    {'value': 'VINHO_IMPORTADO', 'label': '🌍 Vinho Importado'},
+    {'value': 'VINHO_TINTO', 'label': 'Vinho Tinto'},
+    {'value': 'VINHO_BRANCO', 'label': 'Vinho Branco'},
+    {'value': 'VINHO_ROSE', 'label': 'Vinho Rosé'},
+    {'value': 'VINHO_ESPUMANTE', 'label': 'Espumante'},
+    {'value': 'VINHO_SOBREMESA', 'label': 'Vinho de Sobremesa'},
+    {'value': 'VINHO_ORGANICO', 'label': 'Vinho Orgânico'},
+    {'value': 'VINHO_IMPORTADO', 'label': 'Vinho Importado'},
   ];
 
   @override

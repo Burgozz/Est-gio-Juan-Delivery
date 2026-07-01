@@ -65,13 +65,13 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
 
   String _labelCategoria(String? cat) {
     const map = {
-      'VINHO_TINTO': '🍷 Tinto',
-      'VINHO_BRANCO': '🥂 Branco',
-      'VINHO_ROSE': '🌸 Rosé',
-      'VINHO_ESPUMANTE': '✨ Espumante',
-      'VINHO_SOBREMESA': '🍯 Sobremesa',
-      'VINHO_ORGANICO': '🌿 Orgânico',
-      'VINHO_IMPORTADO': '🌍 Importado',
+      'VINHO_TINTO': 'Tinto',
+      'VINHO_BRANCO': 'Branco',
+      'VINHO_ROSE': 'Rosé',
+      'VINHO_ESPUMANTE': 'Espumante',
+      'VINHO_SOBREMESA': 'Sobremesa',
+      'VINHO_ORGANICO': 'Orgânico',
+      'VINHO_IMPORTADO': 'Importado',
     };
     return map[cat] ?? cat ?? '-';
   }

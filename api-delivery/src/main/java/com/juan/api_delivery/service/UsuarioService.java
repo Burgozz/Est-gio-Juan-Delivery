@@ -25,6 +25,9 @@ public class UsuarioService {
     }
 
     public Usuario criar(UsuarioDTO dto) {
+        if (repository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email já cadastrado");
+        }
         Usuario usuario = Usuario.builder()
         .nome(dto.getNome())
         .email(dto.getEmail())
@@ -37,6 +40,9 @@ public class UsuarioService {
 
     public Usuario atualizar(Long id, UsuarioDTO dto) {
         Usuario usuario = buscarPorId(id);
+    repository.findByEmail(dto.getEmail())
+        .filter(u -> !u.getId().equals(id))
+        .ifPresent(u -> { throw new IllegalArgumentException("Email já cadastrado"); });
     usuario.setNome(dto.getNome());
     usuario.setEmail(dto.getEmail());
     usuario.setSenha(dto.getSenha());
