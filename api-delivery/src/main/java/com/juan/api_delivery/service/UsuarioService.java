@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +26,18 @@ public class UsuarioService {
     }
 
     public Usuario criar(UsuarioDTO dto) {
-        if (repository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email já cadastrado");
+        Optional<Usuario> existente = repository.findByEmail(dto.getEmail());
+        if (existente.isPresent()) {
+            Usuario usuario = existente.get();
+            if (usuario.isAtivo()) {
+                throw new IllegalArgumentException("Email já cadastrado");
+            }
+            usuario.setNome(dto.getNome());
+            usuario.setSenha(dto.getSenha());
+            usuario.setTelefone(dto.getTelefone());
+            usuario.setDataCadastro(LocalDate.now());
+            usuario.setAtivo(true);
+            return repository.save(usuario);
         }
         Usuario usuario = Usuario.builder()
         .nome(dto.getNome())

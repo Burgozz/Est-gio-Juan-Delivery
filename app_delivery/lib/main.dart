@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/usuario_list_screen.dart';
 import 'screens/produto_list_screen.dart';
 
@@ -83,12 +84,34 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  static const _prefsKey = 'home_tab_index';
+
   int _index = 0;
 
   final _telas = const [
     UsuarioListScreen(),
     ProdutoListScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreIndex();
+  }
+
+  Future<void> _restoreIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getInt(_prefsKey);
+    if (saved != null && saved >= 0 && saved < _telas.length && mounted) {
+      setState(() => _index = saved);
+    }
+  }
+
+  Future<void> _selecionarAba(int i) async {
+    setState(() => _index = i);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_prefsKey, i);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
         unselectedItemColor: kTextSecondary,
         backgroundColor: kSurface,
         elevation: 8,
-        onTap: (i) => setState(() => _index = i),
+        onTap: _selecionarAba,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.people_outline),
