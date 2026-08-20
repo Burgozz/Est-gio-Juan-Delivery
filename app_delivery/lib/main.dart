@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/usuario_list_screen.dart';
 import 'screens/produto_list_screen.dart';
+import 'screens/catalogo_screen.dart';
+import 'screens/login_screen.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kBackground = Color(0xFFFAFAFA);
@@ -71,7 +73,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomeScreen(),
+      home: const LoginScreen(),
     );
   }
 }
@@ -91,6 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _telas = const [
     UsuarioListScreen(),
     ProdutoListScreen(),
+    CatalogoScreen(),
   ];
 
   @override
@@ -134,6 +137,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.wine_bar_outlined),
             activeIcon: Icon(Icons.wine_bar),
             label: 'Produtos',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.storefront_outlined),
+            activeIcon: Icon(Icons.storefront),
+            label: 'Catálogo',
           ),
         ],
       ),

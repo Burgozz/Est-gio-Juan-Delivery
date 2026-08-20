@@ -27,6 +27,29 @@ class ProdutoService {
     return data.map((e) => Produto.fromJson(e)).toList();
   }
 
+  /// Lista todos os produtos ativos do catálogo (GET /produtos).
+  Future<List<Produto>> listarAtivos() => listarTodos();
+
+  /// Lista os produtos ativos filtrando por categoria (GET /produtos?categoria=).
+  Future<List<Produto>> listarPorCategoria(String categoria) async {
+    final uri = Uri.parse(baseUrl).replace(queryParameters: {'categoria': categoria});
+    final response = await http.get(uri);
+    if (response.statusCode != 200) {
+      throw Exception(_parseErro(response));
+    }
+    final List data = jsonDecode(response.body);
+    return data.map((e) => Produto.fromJson(e)).toList();
+  }
+
+  /// Busca um produto ativo pelo id (GET /produtos/{id}).
+  Future<Produto> buscarPorId(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/$id'));
+    if (response.statusCode != 200) {
+      throw Exception(_parseErro(response));
+    }
+    return Produto.fromJson(jsonDecode(response.body));
+  }
+
   Future<void> criar(Produto produto) async {
     final response = await http.post(
       Uri.parse(baseUrl),

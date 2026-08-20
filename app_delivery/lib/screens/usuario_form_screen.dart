@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/usuario.dart';
 import '../services/usuario_service.dart';
+import '../utils/cpf_formatter.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kTextPrimary = Color(0xFF212121);
@@ -18,6 +19,7 @@ class UsuarioFormScreen extends StatefulWidget {
 class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomeCtrl = TextEditingController();
+  final _cpfCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _senhaCtrl = TextEditingController();
   final _telefoneCtrl = TextEditingController();
@@ -29,6 +31,7 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
     super.initState();
     if (widget.usuario != null) {
       _nomeCtrl.text = widget.usuario!.nome;
+      _cpfCtrl.text = widget.usuario!.cpf;
       _emailCtrl.text = widget.usuario!.email;
       _senhaCtrl.text = widget.usuario!.senha;
       _telefoneCtrl.text = widget.usuario!.telefone ?? '';
@@ -40,6 +43,7 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     final u = Usuario(
       nome: _nomeCtrl.text.trim(),
+      cpf: _cpfCtrl.text.replaceAll(RegExp(r'[^0-9]'), ''),
       email: _emailCtrl.text.trim(),
       senha: _senhaCtrl.text.trim(),
       telefone: _telefoneCtrl.text.trim().isEmpty ? null : _telefoneCtrl.text.trim(),
@@ -93,6 +97,28 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                   prefixIcon: Icon(Icons.person_outline, color: kTextSecondary, size: 20),
                 ),
                 validator: (v) => v!.isEmpty ? 'Informe o nome' : null,
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _cpfCtrl,
+                style: const TextStyle(color: kTextPrimary),
+                cursorColor: kPrimary,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  CpfInputFormatter(),
+                ],
+                decoration: const InputDecoration(
+                  labelText: 'CPF *',
+                  hintText: 'XXX.XXX.XXX-XX',
+                  prefixIcon: Icon(Icons.badge_outlined, color: kTextSecondary, size: 20),
+                ),
+                validator: (v) {
+                  final digits = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                  if (digits.isEmpty) return 'Informe o CPF';
+                  if (digits.length != 11) return 'CPF deve ter exatamente 11 dígitos';
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
               TextFormField(

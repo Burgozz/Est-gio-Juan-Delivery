@@ -33,6 +33,7 @@ public class UsuarioService {
                 throw new IllegalArgumentException("Email já cadastrado");
             }
             usuario.setNome(dto.getNome());
+            usuario.setCpf(dto.getCpf());
             usuario.setSenha(dto.getSenha());
             usuario.setTelefone(dto.getTelefone());
             usuario.setDataCadastro(LocalDate.now());
@@ -41,6 +42,7 @@ public class UsuarioService {
         }
         Usuario usuario = Usuario.builder()
         .nome(dto.getNome())
+        .cpf(dto.getCpf())
         .email(dto.getEmail())
         .senha(dto.getSenha())
         .telefone(dto.getTelefone())
@@ -55,6 +57,7 @@ public class UsuarioService {
         .filter(u -> !u.getId().equals(id))
         .ifPresent(u -> { throw new IllegalArgumentException("Email já cadastrado"); });
     usuario.setNome(dto.getNome());
+    usuario.setCpf(dto.getCpf());
     usuario.setEmail(dto.getEmail());
     usuario.setSenha(dto.getSenha());
     usuario.setTelefone(dto.getTelefone());
@@ -65,5 +68,15 @@ public class UsuarioService {
         Usuario usuario = buscarPorId(id);
         usuario.setAtivo(false);
         repository.save(usuario);
+    }
+
+    public Usuario login(String email, String senha) {
+        Usuario usuario = repository.findByEmail(email)
+            .filter(Usuario::isAtivo)
+            .orElseThrow(CredenciaisInvalidasException::new);
+        if (!usuario.getSenha().equals(senha)) {
+            throw new CredenciaisInvalidasException();
+        }
+        return usuario;
     }
 }

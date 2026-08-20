@@ -3,6 +3,7 @@ package com.juan.api_delivery.dto;
 import java.math.BigDecimal;
 
 import com.juan.api_delivery.model.CategoriaProduto;
+import com.juan.api_delivery.model.TipoProduto;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
@@ -23,11 +24,23 @@ public class ProdutoDTO {
     @DecimalMin("0.0")
     private BigDecimal preco;
     private String descricao;
+    @NotNull(message = "Informe o tipo do produto (VINHO ou ACESSORIO)")
+    private TipoProduto tipo;
+
+    // Campos específicos de Vinho
     private CategoriaProduto categoria;
     private String paisOrigem;
     @Min(value = 1900, message = "Safra deve ser a partir de 1900")
     @Max(value = 2026, message = "Safra não pode ser maior que o ano atual")
     private Integer safra;
+    private Double teorAlcool;
+    private String harmonizacao;
+
+    // Campos específicos de Acessorio
+    private String tipoAcessorio;
+    private String marca;
+    private String material;
+
     @NotNull(message = "Informe o estoque")
     @Min(value = 0, message = "Estoque não pode ser negativo")
     private Integer estoque;

@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.juan.api_delivery.dto.ProdutoDTO;
+import com.juan.api_delivery.dto.ProdutoRespostaDTO;
 import com.juan.api_delivery.model.Produto;
 import com.juan.api_delivery.service.ProdutoService;
 
@@ -28,13 +30,18 @@ public class ProdutoController {
     private final ProdutoService service;
 
     @GetMapping
-    public ResponseEntity<List<Produto>> listarTodos() {
-        return ResponseEntity.ok(service.listarTodos());
+    public ResponseEntity<List<ProdutoRespostaDTO>> listar(
+            @RequestParam(required = false) String categoria) {
+        List<Produto> produtos = (categoria == null || categoria.isBlank())
+            ? service.listarTodos()
+            : service.listarPorCategoria(categoria);
+        return ResponseEntity.ok(produtos.stream().map(ProdutoRespostaDTO::from).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(service.buscarPorId(id));
+    public ResponseEntity<ProdutoRespostaDTO> buscarPorId(@PathVariable Long id) {
+        Produto produto = service.buscarAtivoPorId(id);
+        return ResponseEntity.ok(ProdutoRespostaDTO.from(produto));
     }
 
     @PostMapping
