@@ -1,6 +1,7 @@
 package com.juan.api_delivery.service;
 
 import com.juan.api_delivery.dto.UsuarioDTO;
+import com.juan.api_delivery.model.PerfilUsuario;
 import com.juan.api_delivery.model.Usuario;
 import com.juan.api_delivery.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class UsuarioService {
             usuario.setTelefone(dto.getTelefone());
             usuario.setDataCadastro(LocalDate.now());
             usuario.setAtivo(true);
+            usuario.setPerfil(PerfilUsuario.CLIENTE);
             return repository.save(usuario);
         }
         Usuario usuario = Usuario.builder()
@@ -47,6 +49,7 @@ public class UsuarioService {
         .senha(dto.getSenha())
         .telefone(dto.getTelefone())
         .dataCadastro(LocalDate.now())
+        .perfil(PerfilUsuario.CLIENTE)
         .build();
     return repository.save(usuario);
     }

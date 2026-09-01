@@ -33,8 +33,18 @@ public class ProdutoController {
     public ResponseEntity<List<ProdutoRespostaDTO>> listar(
             @RequestParam(required = false) String categoria) {
         List<Produto> produtos = (categoria == null || categoria.isBlank())
-            ? service.listarTodos()
+            ? service.listarAtivos()
             : service.listarPorCategoria(categoria);
+        return ResponseEntity.ok(produtos.stream().map(ProdutoRespostaDTO::from).toList());
+    }
+
+    /**
+     * Usado pela tela de administração: retorna todos os produtos,
+     * incluindo os inativos.
+     */
+    @GetMapping("/admin")
+    public ResponseEntity<List<ProdutoRespostaDTO>> listarTodosAdmin() {
+        List<Produto> produtos = service.listarTodos();
         return ResponseEntity.ok(produtos.stream().map(ProdutoRespostaDTO::from).toList());
     }
 

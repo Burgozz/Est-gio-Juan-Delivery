@@ -19,8 +19,16 @@ public class ProdutoService {
 
     private final ProdutoRepository repository;
 
-    public List<Produto> listarTodos() {
+    public List<Produto> listarAtivos() {
         return repository.findByAtivoTrue();
+    }
+
+    /**
+     * Usado pela tela de administração: retorna todos os produtos,
+     * incluindo os inativos (desativados por estoque zerado ou exclusão).
+     */
+    public List<Produto> listarTodos() {
+        return repository.findAll();
     }
 
     public List<Produto> listarPorCategoria(String categoria) {
@@ -47,6 +55,7 @@ public class ProdutoService {
         }
         validarCamposPorTipo(dto);
         Produto produto = construirNovoProduto(dto);
+        atualizarAtivoConformeEstoque(produto);
         return repository.save(produto);
     }
 
@@ -68,7 +77,22 @@ public class ProdutoService {
             acessorio.setMarca(dto.getMarca());
             acessorio.setMaterial(dto.getMaterial());
         }
+        atualizarAtivoConformeEstoque(produto);
         return repository.save(produto);
+    }
+
+    /**
+     * Desativa automaticamente o produto quando o estoque zera e o
+     * reativa automaticamente quando volta a ter estoque, mantendo o
+     * campo "ativo" sempre coerente com o estoque atual.
+     */
+    private void atualizarAtivoConformeEstoque(Produto produto) {
+        Integer estoque = produto.getEstoque();
+        if (estoque != null && estoque == 0) {
+            produto.setAtivo(false);
+        } else if (estoque != null && estoque > 0 && !produto.isAtivo()) {
+            produto.setAtivo(true);
+        }
     }
 
     /**

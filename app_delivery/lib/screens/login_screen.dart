@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
 import '../utils/auth_theme.dart';
+import '../utils/sessao_usuario.dart';
 import 'cadastro_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _senhaCtrl = TextEditingController();
+  final _senhaFocus = FocusNode();
   final _service = AuthService();
   bool _carregando = false;
 
@@ -22,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailCtrl.dispose();
     _senhaCtrl.dispose();
+    _senhaFocus.dispose();
     super.dispose();
   }
 
@@ -29,11 +33,28 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _carregando = true);
     try {
-      await _service.login(_emailCtrl.text.trim(), _senhaCtrl.text.trim());
+      final dados = await _service.login(_emailCtrl.text.trim(), _senhaCtrl.text.trim());
+      // Guarda os dados básicos do usuário logado para uso em telas como a
+      // InicioScreen (saudação personalizada).
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('usuario_nome', (dados['nome'] ?? '').toString());
+      await prefs.setString('usuario_email', (dados['email'] ?? '').toString());
+      final id = dados['id'];
+      if (id != null) {
+        await prefs.setInt('usuario_id', int.tryParse(id.toString()) ?? 0);
+      }
+      // Guarda o perfil retornado pela API na sessão global, usada pela
+      // MainScreen para decidir quais telas o usuário pode acessar.
+      SessaoUsuario.salvar(
+        id: id == null ? null : int.tryParse(id.toString()),
+        nome: (dados['nome'] ?? '').toString(),
+        email: (dados['email'] ?? '').toString(),
+        perfil: dados['perfil']?.toString(),
+      );
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const MainScreen()),
         );
       }
     } catch (e) {
@@ -84,6 +105,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: const TextStyle(color: kAuthFieldText),
                     cursorColor: kAuthFieldBorderFocused,
                     keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) => _senhaFocus.requestFocus(),
                     decoration: authInputDecoration(
                       label: 'E-mail',
                       icon: Icons.email_outlined,
@@ -102,9 +125,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: _senhaCtrl,
+                    focusNode: _senhaFocus,
                     style: const TextStyle(color: kAuthFieldText),
                     cursorColor: kAuthFieldBorderFocused,
                     obscureText: true,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _entrar(),
                     decoration: authInputDecoration(
                       label: 'Senha',
                       icon: Icons.lock_outline,

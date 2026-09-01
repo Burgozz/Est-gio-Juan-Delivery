@@ -2,6 +2,8 @@ package com.juan.api_delivery.model;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,6 +11,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,14 +33,21 @@ public class ItemPedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Min(value = 1, message = "Quantidade mínima é 1")
     private int quantidade;
 
+    @NotNull
+    @DecimalMin(value = "0.0", message = "Preço unitário não pode ser negativo")
     private BigDecimal precoUnit;
 
+    // Ignorado na serialização para evitar recursão infinita ao serializar
+    // Pedido -> itens -> pedido -> ... (GET /pedidos retorna a entidade
+    // Pedido diretamente, incluindo a lista de itens).
     @ManyToOne
     @JoinColumn(name = "pedido_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Pedido pedido;
 
     @ManyToOne

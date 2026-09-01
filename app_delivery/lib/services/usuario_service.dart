@@ -27,6 +27,14 @@ class UsuarioService {
     return data.map((e) => Usuario.fromJson(e)).toList();
   }
 
+  Future<Usuario> buscarPorId(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/$id'));
+    if (response.statusCode != 200) {
+      throw Exception(_parseErro(response));
+    }
+    return Usuario.fromJson(jsonDecode(response.body));
+  }
+
   Future<void> criar(Usuario usuario) async {
     final response = await http.post(
       Uri.parse(baseUrl),

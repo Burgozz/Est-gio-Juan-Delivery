@@ -2,6 +2,7 @@ package com.juan.api_delivery.model;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,9 +18,12 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Acessorio extends Produto {
 
+    @NotBlank
     private String tipoAcessorio;
 
+    @NotBlank
     private String marca;
 
+    @NotBlank
     private String material;
 }

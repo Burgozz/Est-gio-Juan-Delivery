@@ -4,6 +4,12 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,14 +25,21 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Vinho extends Produto {
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private CategoriaProduto categoria;
 
+    @NotBlank
     private String paisOrigem;
 
+    @Min(value = 1800, message = "Safra inválida")
+    @Max(value = 2025, message = "Safra inválida")
     private int safra;
 
-    private Double teorAlcool;
+    @DecimalMin(value = "0.0", message = "Teor alcoólico não pode ser negativo")
+    @DecimalMax(value = "100.0", message = "Teor alcoólico inválido")
+    private double teorAlcool;
 
+    @NotBlank
     private String harmonizacao;
 }

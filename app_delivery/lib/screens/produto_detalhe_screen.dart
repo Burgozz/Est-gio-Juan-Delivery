@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../controllers/carrinho_controller.dart';
 import '../models/produto.dart';
 import '../services/produto_service.dart';
+import '../widgets/carrinho_appbar_action.dart';
 import 'catalogo_screen.dart' show labelCategoria, labelTipo, kPrimary, kBackground, kTextPrimary, kTextSecondary;
 
 class ProdutoDetalheScreen extends StatefulWidget {
@@ -45,12 +48,13 @@ class _ProdutoDetalheScreenState extends State<ProdutoDetalheScreen> {
     }
   }
 
-  void _adicionarAoCarrinho() {
-    // Placeholder: integração com o carrinho será implementada em outro caso de uso.
+  void _adicionarAoCarrinho(Produto produto) {
+    context.read<CarrinhoController>().adicionar(produto);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Em breve: adicionar ao carrinho'),
-        backgroundColor: kPrimary,
+      SnackBar(
+        content: const Text('Produto adicionado ao carrinho!'),
+        backgroundColor: Colors.green.shade700,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -66,6 +70,7 @@ class _ProdutoDetalheScreenState extends State<ProdutoDetalheScreen> {
           tooltip: 'Voltar ao catálogo',
           onPressed: () => Navigator.pop(context),
         ),
+        actions: const [CarrinhoAppBarAction()],
       ),
       body: _carregando
           ? const Center(child: CircularProgressIndicator(color: kPrimary))
@@ -149,7 +154,7 @@ class _ProdutoDetalheScreenState extends State<ProdutoDetalheScreen> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: _adicionarAoCarrinho,
+              onPressed: () => _adicionarAoCarrinho(p),
               icon: const Icon(Icons.shopping_cart_outlined),
               label: const Text('ADICIONAR AO CARRINHO'),
             ),
@@ -180,6 +185,10 @@ class _ProdutoDetalheScreenState extends State<ProdutoDetalheScreen> {
           style: TextStyle(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
       const SizedBox(height: 10),
       _InfoLinha(icone: Icons.category_outlined, label: 'Categoria', valor: labelCategoria(p.categoria)),
+      _InfoLinha(
+          icone: Icons.flag_outlined,
+          label: 'País de Origem da Uva',
+          valor: (p.paisOrigem != null && p.paisOrigem!.isNotEmpty) ? p.paisOrigem! : '-'),
       _InfoLinha(
           icone: Icons.calendar_today_outlined,
           label: 'Safra',

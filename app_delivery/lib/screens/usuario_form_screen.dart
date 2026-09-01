@@ -25,6 +25,10 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
   final _telefoneCtrl = TextEditingController();
   final service = UsuarioService();
   String? _emailApiError;
+  String? _nomeApiError;
+  String? _cpfApiError;
+  String? _telefoneApiError;
+  String? _senhaApiError;
 
   @override
   void initState() {
@@ -39,7 +43,13 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
   }
 
   Future<void> _salvar() async {
-    setState(() => _emailApiError = null);
+    setState(() {
+      _emailApiError = null;
+      _nomeApiError = null;
+      _cpfApiError = null;
+      _telefoneApiError = null;
+      _senhaApiError = null;
+    });
     if (!_formKey.currentState!.validate()) return;
     final u = Usuario(
       nome: _nomeCtrl.text.trim(),
@@ -59,8 +69,21 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
     } catch (e) {
       final mensagem = e.toString().replaceFirst('Exception: ', '');
       if (mounted) {
-        if (mensagem.toLowerCase().contains('email')) {
+        final msgLower = mensagem.toLowerCase();
+        if (msgLower.contains('email')) {
           setState(() => _emailApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (msgLower.contains('cpf')) {
+          setState(() => _cpfApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (msgLower.contains('telefone')) {
+          setState(() => _telefoneApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (msgLower.contains('senha')) {
+          setState(() => _senhaApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (msgLower.contains('nome')) {
+          setState(() => _nomeApiError = mensagem);
           _formKey.currentState!.validate();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -92,11 +115,24 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                 controller: _nomeCtrl,
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ ]')),
+                ],
                 decoration: const InputDecoration(
                   labelText: 'Nome *',
                   prefixIcon: Icon(Icons.person_outline, color: kTextSecondary, size: 20),
                 ),
-                validator: (v) => v!.isEmpty ? 'Informe o nome' : null,
+                onChanged: (_) {
+                  if (_nomeApiError != null) setState(() => _nomeApiError = null);
+                },
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Informe o nome';
+                  if (!RegExp(r'^[a-zA-ZÀ-ÿ ]+$').hasMatch(v)) {
+                    return 'Nome deve conter apenas letras';
+                  }
+                  if (_nomeApiError != null) return _nomeApiError;
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
               TextFormField(
@@ -113,10 +149,14 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                   hintText: 'XXX.XXX.XXX-XX',
                   prefixIcon: Icon(Icons.badge_outlined, color: kTextSecondary, size: 20),
                 ),
+                onChanged: (_) {
+                  if (_cpfApiError != null) setState(() => _cpfApiError = null);
+                },
                 validator: (v) {
                   final digits = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
                   if (digits.isEmpty) return 'Informe o CPF';
                   if (digits.length != 11) return 'CPF deve ter exatamente 11 dígitos';
+                  if (_cpfApiError != null) return _cpfApiError;
                   return null;
                 },
               ),
@@ -151,7 +191,14 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                   labelText: 'Senha *',
                   prefixIcon: Icon(Icons.lock_outline, color: kTextSecondary, size: 20),
                 ),
-                validator: (v) => v!.isEmpty ? 'Informe a senha' : null,
+                onChanged: (_) {
+                  if (_senhaApiError != null) setState(() => _senhaApiError = null);
+                },
+                validator: (v) {
+                  if (v!.isEmpty) return 'Informe a senha';
+                  if (_senhaApiError != null) return _senhaApiError;
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
               TextFormField(
@@ -168,12 +215,16 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
                   hintText: 'Ex: 11987654321',
                   prefixIcon: Icon(Icons.phone_outlined, color: kTextSecondary, size: 20),
                 ),
+                onChanged: (_) {
+                  if (_telefoneApiError != null) setState(() => _telefoneApiError = null);
+                },
                 validator: (v) {
-                  if (v == null || v.isEmpty) return null;
+                  if (v == null || v.isEmpty) return _telefoneApiError;
                   if (v.length < 10 || v.length > 11) {
                     return 'Telefone deve ter 10 ou 11 dígitos (com DDD)';
                   }
                   if (v[0] == '0') return 'DDD inválido (não pode começar com 0)';
+                  if (_telefoneApiError != null) return _telefoneApiError;
                   return null;
                 },
               ),

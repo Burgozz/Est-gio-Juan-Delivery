@@ -2,6 +2,8 @@ package com.juan.api_delivery.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -9,6 +11,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +36,7 @@ public class Usuario {
     private Long id;
 
     @NotBlank
+    @Size(min = 2, max = 100, message = "Nome deve ter entre 2 e 100 caracteres")
     private String nome;
 
     @Email
@@ -39,10 +44,14 @@ public class Usuario {
     private String email;
 
     @NotBlank
+    @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
     private String senha;
 
+    @Pattern(regexp = "\\d{10,11}", message = "Telefone deve conter 10 ou 11 dígitos numéricos")
     private String telefone;
 
+    @NotBlank
+    @Pattern(regexp = "\\d{11}", message = "CPF deve conter exatamente 11 dígitos numéricos")
     private String cpf;
 
     private LocalDate dataCadastro;
@@ -50,6 +59,11 @@ public class Usuario {
     @Builder.Default
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean ativo = true;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(nullable = false)
+    private PerfilUsuario perfil = PerfilUsuario.CLIENTE;
 
     @OneToMany(mappedBy = "usuario")
     @Builder.Default

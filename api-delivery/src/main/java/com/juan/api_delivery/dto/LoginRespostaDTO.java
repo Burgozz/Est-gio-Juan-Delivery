@@ -1,5 +1,6 @@
 package com.juan.api_delivery.dto;
 
+import com.juan.api_delivery.model.PerfilUsuario;
 import com.juan.api_delivery.model.Usuario;
 
 import lombok.AllArgsConstructor;
@@ -16,8 +17,9 @@ public class LoginRespostaDTO {
     private Long id;
     private String nome;
     private String email;
+    private PerfilUsuario perfil;
 
     public static LoginRespostaDTO from(Usuario usuario) {
-        return new LoginRespostaDTO(usuario.getId(), usuario.getNome(), usuario.getEmail());
+        return new LoginRespostaDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil());
     }
 }

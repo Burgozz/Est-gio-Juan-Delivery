@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/produto.dart';
 import '../services/produto_service.dart';
+import '../widgets/pais_autocomplete_field.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kTextPrimary = Color(0xFF212121);
@@ -32,6 +33,18 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
 
   String _tipo = 'VINHO';
   String? _categoriaSelecionada;
+
+  // Erros de validação retornados pelo backend (GlobalExceptionHandler),
+  // exibidos embaixo do campo correspondente seguindo o mesmo padrão usado
+  // para o campo email nos formulários de usuário.
+  String? _categoriaApiError;
+  String? _paisApiError;
+  String? _safraApiError;
+  String? _teorAlcoolApiError;
+  String? _harmonizacaoApiError;
+  String? _tipoAcessorioApiError;
+  String? _marcaApiError;
+  String? _materialApiError;
 
   final List<Map<String, String>> _categorias = [
     {'value': 'VINHO_TINTO', 'label': 'Vinho Tinto'},
@@ -64,9 +77,22 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
       _estoqueCtrl.text = p.estoque.toString();
       _categoriaSelecionada = p.categoria;
     }
+    _paisCtrl.addListener(() {
+      if (_paisApiError != null) setState(() => _paisApiError = null);
+    });
   }
 
   Future<void> _salvar() async {
+    setState(() {
+      _categoriaApiError = null;
+      _paisApiError = null;
+      _safraApiError = null;
+      _teorAlcoolApiError = null;
+      _harmonizacaoApiError = null;
+      _tipoAcessorioApiError = null;
+      _marcaApiError = null;
+      _materialApiError = null;
+    });
     if (!_formKey.currentState!.validate()) return;
     final p = Produto(
       nome: _nomeCtrl.text.trim(),
@@ -93,13 +119,40 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
     } catch (e) {
       if (mounted) {
         final mensagem = e.toString().replaceFirst('Exception: ', '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(mensagem),
-            backgroundColor: Colors.red.shade700,
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        final msgLower = mensagem.toLowerCase();
+        if (_isVinho && msgLower.contains('categoria')) {
+          setState(() => _categoriaApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (_isVinho && (msgLower.contains('país') || msgLower.contains('pais'))) {
+          setState(() => _paisApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (_isVinho && msgLower.contains('safra')) {
+          setState(() => _safraApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (_isVinho && (msgLower.contains('alcoólico') || msgLower.contains('alcoolico'))) {
+          setState(() => _teorAlcoolApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (_isVinho && msgLower.contains('harmoniza')) {
+          setState(() => _harmonizacaoApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (!_isVinho && (msgLower.contains('acessório') || msgLower.contains('acessorio'))) {
+          setState(() => _tipoAcessorioApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (!_isVinho && msgLower.contains('marca')) {
+          setState(() => _marcaApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (!_isVinho && msgLower.contains('material')) {
+          setState(() => _materialApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(mensagem),
+              backgroundColor: Colors.red.shade700,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
       }
     }
   }
@@ -225,21 +278,31 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
         items: _categorias
             .map((c) => DropdownMenuItem(value: c['value'], child: Text(c['label']!)))
             .toList(),
-        onChanged: (val) => setState(() => _categoriaSelecionada = val),
-        validator: (v) => _isVinho && v == null ? 'Selecione a categoria' : null,
+        onChanged: (val) => setState(() {
+          _categoriaSelecionada = val;
+          _categoriaApiError = null;
+        }),
+        validator: (v) {
+          if (_isVinho && v == null) return 'Selecione a categoria';
+          if (_categoriaApiError != null) return _categoriaApiError;
+          return null;
+        },
       ),
       const SizedBox(height: 20),
       Row(
         children: [
           Expanded(
-            child: TextFormField(
+            child: PaisAutocompleteField(
               controller: _paisCtrl,
-              style: const TextStyle(color: kTextPrimary),
-              cursorColor: kPrimary,
-              decoration: const InputDecoration(
-                labelText: 'País de Origem',
-                prefixIcon: Icon(Icons.flag_outlined, color: kTextSecondary, size: 20),
-              ),
+              validator: (v) {
+                if (!_isVinho) return null;
+                if (v == null || v.trim().isEmpty) return 'Informe o país de origem';
+                if (!paisValido(v)) {
+                  return 'País inválido. Selecione um país da lista.';
+                }
+                if (_paisApiError != null) return _paisApiError;
+                return null;
+              },
             ),
           ),
           const SizedBox(width: 12),
@@ -258,14 +321,19 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                 hintText: 'Ex: 2021',
                 prefixIcon: Icon(Icons.calendar_today_outlined, color: kTextSecondary, size: 20),
               ),
+              onChanged: (_) {
+                if (_safraApiError != null) setState(() => _safraApiError = null);
+              },
               validator: (v) {
-                if (v == null || v.isEmpty) return null;
+                if (v == null || v.isEmpty) {
+                  return _safraApiError;
+                }
                 final ano = int.tryParse(v);
                 if (ano == null) return 'Ano inválido';
                 if (ano < 1900 || ano > 2026) {
                   return 'Safra deve ser entre 1900 e 2026';
                 }
-                return null;
+                return _safraApiError;
               },
             ),
           ),
@@ -284,9 +352,13 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                 labelText: 'Teor Alcoólico (%)',
                 prefixIcon: Icon(Icons.opacity_outlined, color: kTextSecondary, size: 20),
               ),
+              onChanged: (_) {
+                if (_teorAlcoolApiError != null) setState(() => _teorAlcoolApiError = null);
+              },
               validator: (v) {
-                if (v == null || v.isEmpty) return null;
-                return double.tryParse(v.trim()) == null ? 'Valor inválido' : null;
+                if (v == null || v.isEmpty) return _teorAlcoolApiError;
+                if (double.tryParse(v.trim()) == null) return 'Valor inválido';
+                return _teorAlcoolApiError;
               },
             ),
           ),
@@ -302,6 +374,10 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
           hintText: 'Ex: Carnes vermelhas, queijos',
           prefixIcon: Icon(Icons.restaurant_outlined, color: kTextSecondary, size: 20),
         ),
+        onChanged: (_) {
+          if (_harmonizacaoApiError != null) setState(() => _harmonizacaoApiError = null);
+        },
+        validator: (v) => _harmonizacaoApiError,
       ),
     ];
   }
@@ -317,9 +393,13 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
           hintText: 'Ex: Saca-rolhas, Decantador, Taça',
           prefixIcon: Icon(Icons.category_outlined, color: kTextSecondary, size: 20),
         ),
-        validator: (v) => !_isVinho && (v == null || v.trim().isEmpty)
-            ? 'Informe o tipo de acessório'
-            : null,
+        onChanged: (_) {
+          if (_tipoAcessorioApiError != null) setState(() => _tipoAcessorioApiError = null);
+        },
+        validator: (v) {
+          if (!_isVinho && (v == null || v.trim().isEmpty)) return 'Informe o tipo de acessório';
+          return _tipoAcessorioApiError;
+        },
       ),
       const SizedBox(height: 20),
       TextFormField(
@@ -330,6 +410,10 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
           labelText: 'Marca',
           prefixIcon: Icon(Icons.local_offer_outlined, color: kTextSecondary, size: 20),
         ),
+        onChanged: (_) {
+          if (_marcaApiError != null) setState(() => _marcaApiError = null);
+        },
+        validator: (v) => _marcaApiError,
       ),
       const SizedBox(height: 20),
       TextFormField(
@@ -341,6 +425,10 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
           hintText: 'Ex: Aço inox, Cristal, Madeira',
           prefixIcon: Icon(Icons.build_outlined, color: kTextSecondary, size: 20),
         ),
+        onChanged: (_) {
+          if (_materialApiError != null) setState(() => _materialApiError = null);
+        },
+        validator: (v) => _materialApiError,
       ),
     ];
   }

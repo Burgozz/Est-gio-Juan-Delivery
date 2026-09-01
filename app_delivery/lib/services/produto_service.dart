@@ -30,6 +30,17 @@ class ProdutoService {
   /// Lista todos os produtos ativos do catálogo (GET /produtos).
   Future<List<Produto>> listarAtivos() => listarTodos();
 
+  /// Usado pela tela de administração de produtos: lista todos os produtos,
+  /// incluindo os inativos (GET /produtos/admin).
+  Future<List<Produto>> listarTodosAdmin() async {
+    final response = await http.get(Uri.parse('$baseUrl/admin'));
+    if (response.statusCode != 200) {
+      throw Exception(_parseErro(response));
+    }
+    final List data = jsonDecode(response.body);
+    return data.map((e) => Produto.fromJson(e)).toList();
+  }
+
   /// Lista os produtos ativos filtrando por categoria (GET /produtos?categoria=).
   Future<List<Produto>> listarPorCategoria(String categoria) async {
     final uri = Uri.parse(baseUrl).replace(queryParameters: {'categoria': categoria});

@@ -23,6 +23,10 @@ class _CadastroScreenState extends State<CadastroScreen> {
   final _service = UsuarioService();
   bool _carregando = false;
   String? _emailApiError;
+  String? _nomeApiError;
+  String? _cpfApiError;
+  String? _telefoneApiError;
+  String? _senhaApiError;
 
   @override
   void dispose() {
@@ -35,7 +39,13 @@ class _CadastroScreenState extends State<CadastroScreen> {
   }
 
   Future<void> _cadastrar() async {
-    setState(() => _emailApiError = null);
+    setState(() {
+      _emailApiError = null;
+      _nomeApiError = null;
+      _cpfApiError = null;
+      _telefoneApiError = null;
+      _senhaApiError = null;
+    });
     if (!_formKey.currentState!.validate()) return;
     setState(() => _carregando = true);
     final usuario = Usuario(
@@ -56,9 +66,21 @@ class _CadastroScreenState extends State<CadastroScreen> {
     } catch (e) {
       final mensagem = e.toString().replaceFirst('Exception: ', '');
       if (mounted) {
-        if (mensagem.toLowerCase().contains('email') ||
-            mensagem.toLowerCase().contains('e-mail')) {
+        final msgLower = mensagem.toLowerCase();
+        if (msgLower.contains('email') || msgLower.contains('e-mail')) {
           setState(() => _emailApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (msgLower.contains('cpf')) {
+          setState(() => _cpfApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (msgLower.contains('telefone')) {
+          setState(() => _telefoneApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (msgLower.contains('senha')) {
+          setState(() => _senhaApiError = mensagem);
+          _formKey.currentState!.validate();
+        } else if (msgLower.contains('nome')) {
+          setState(() => _nomeApiError = mensagem);
           _formKey.currentState!.validate();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -101,12 +123,24 @@ class _CadastroScreenState extends State<CadastroScreen> {
                   controller: _nomeCtrl,
                   style: const TextStyle(color: kAuthFieldText),
                   cursorColor: kAuthFieldBorderFocused,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ ]')),
+                  ],
                   decoration: authInputDecoration(
                     label: 'Nome completo',
                     icon: Icons.person_outline,
                   ),
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Informe o nome' : null,
+                  onChanged: (_) {
+                    if (_nomeApiError != null) setState(() => _nomeApiError = null);
+                  },
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Informe o nome';
+                    if (!RegExp(r'^[a-zA-ZÀ-ÿ ]+$').hasMatch(v)) {
+                      return 'Nome deve conter apenas letras';
+                    }
+                    if (_nomeApiError != null) return _nomeApiError;
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
@@ -123,12 +157,16 @@ class _CadastroScreenState extends State<CadastroScreen> {
                     hint: 'XXX.XXX.XXX-XX',
                     icon: Icons.badge_outlined,
                   ),
+                  onChanged: (_) {
+                    if (_cpfApiError != null) setState(() => _cpfApiError = null);
+                  },
                   validator: (v) {
                     final digits = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
                     if (digits.isEmpty) return 'Informe o CPF';
                     if (digits.length != 11) {
                       return 'CPF deve ter exatamente 11 dígitos';
                     }
+                    if (_cpfApiError != null) return _cpfApiError;
                     return null;
                   },
                 ),
@@ -144,8 +182,14 @@ class _CadastroScreenState extends State<CadastroScreen> {
                     hint: 'Ex: 11987654321',
                     icon: Icons.phone_outlined,
                   ),
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Informe o telefone' : null,
+                  onChanged: (_) {
+                    if (_telefoneApiError != null) setState(() => _telefoneApiError = null);
+                  },
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Informe o telefone';
+                    if (_telefoneApiError != null) return _telefoneApiError;
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
@@ -182,8 +226,14 @@ class _CadastroScreenState extends State<CadastroScreen> {
                     label: 'Senha',
                     icon: Icons.lock_outline,
                   ),
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Informe a senha' : null,
+                  onChanged: (_) {
+                    if (_senhaApiError != null) setState(() => _senhaApiError = null);
+                  },
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Informe a senha';
+                    if (_senhaApiError != null) return _senhaApiError;
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 32),
                 SizedBox(
